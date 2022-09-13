@@ -25,13 +25,25 @@ This is a simple example that strips out a lot of generally accepted architectur
 
 ### How to best use this demo:
 
+###### What it does:
+
+This example app requests the path representing the apps data files directory. It requests that path in two ways and compares the results. It is successful if the paths match and fails it they don't. The first way it requests the path is directly in the MainFragment by using the available context (see directRequest in MainFragment). The second way is the reasons for this example. We inject a heirarchy of dependencies and use those to get the same path (see injectedRequest in MainFragment). Of course this second method is not necessary given that the first method is easily available to us. The second way is for illustration. It illustrates injecting dependencies deep into our class structure and gives us a reliable way of confirming that it works.
+
+![](./Screenshot_1663039673.png)
+
+Figure 1 - Yeah the paths match !
+
+###### Okay, let's do it:
+
 The starting point of this app was the template for a new project in Android Studio Chipmunk | 2021.2.1 Patch 2 called “Fragment + ViewModel” and using Kotlin. You can create an empty project based on that template and compare it to this project to discern what needs to be done to get your project started with Hilt dependency injection. 
 
 If you have experience with Dagger, most of this will look and feel very familiar. That's because Hilt is a wrapper around Dagger.
 
-The gist of using Hilt is that we need to define a *@Module* that *@Provides* instances of Classes where and when we need them. This is advantageous because we can *@Inject* instances of our dependencies into the code where we need them. The '@' sign preceding Module, Provides and Inject are there because those are annotations provided by the hilt libraries and processors.
+The gist of using Hilt is that we need to define a *@Module* that *@Provides* instances of Classes where and when we need them. This is advantageous because we can *@Inject* instances of our dependencies into the code where we need them. The '@' sign preceding Module, Provides and Inject are there because those are annotations provided by the hilt libraries and processors. You will also need to annotate your ViewModels with *@HiltViewModel*.
 
-In order to use Hilt in our App we need to create a subclass of Application, in our examples called *RoysApplication*, which is annotated with *@HiltApplication*. Please note that in *RoysApplication* we provide a getter to return the instance of *RoysApplication*. I use the singular "the" because in Android, the Application class is instantiated as a singleton, there will only be one Application object.
+In what seems like a bad "chicken or the egg" joke, in order to achieve automated dependancy injection we must first manually add a few dependancies to our gradle files. In the "complete" branch, I have commented the neccessay additions so that they are obvious. I will let the reader use those as reference.
+
+In order to use Hilt in our App we need to create a subclass of Application, in our examples called *RoysApplication*, which is annotated with *@HiltApplication*. Please note that in *RoysApplication* we provide a getter to return the instance of *RoysApplication*. I use the singular "the" because in Android, the Application class is instantiated as a singleton, there will only be one Application object. Don't forget to add the Application subclass to the AndroidManifest as illustrated in my example.
 
 Next let's create some simple classes that we can use to inject. What I created for that purpose is in the package named *com.delasystems.androidhiltexample.data*. I created a simple class called *RoysFiler* which has but one method, *getFile()* , which simply returns the apps *filesDir*. I chose this because it is an Android API call that requires a *context*. I also created a very simple data repository called *RoysRepository*. It too has just one method called *getFileDirectory()*. It calls the *getFile()* method in *RoysFiler*. I call the repositories *getFileDirectory()* method from my ViewModel. I chose this configuration because we have a hierarchy of dependancies. RoysFiler needs a context which is not available to plain old Kotlin classes, that is those not derived from an Android  Activity or a very few other Android classes. RoysRepository in turn depends on RoysFiler, MainViewModel depends on RoysRepository and finally, MainFragment depends on MainViewModel.
 
@@ -45,7 +57,7 @@ Likewise *providesRoyFiler(context: Context)* provides a single instance of *Roy
 
 Finally, *provideContext()* provides an *ApplicationContext* when desired. Notice that it is not annotated as *@Singleton*. That is because Application is always a singleton so the annotation is not needed.
 
-Thank you and if you have ny comments or questions please feel free to contact me at rwatson@dela.com
+Thank you and if you have any comments or questions please feel free to contact me at rwatson@dela.com
 
 ## License:
 

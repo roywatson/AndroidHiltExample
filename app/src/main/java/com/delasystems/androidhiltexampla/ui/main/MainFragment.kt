@@ -6,15 +6,19 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
+import androidx.fragment.app.viewModels
 import com.delasystems.androidhiltexampla.R
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainFragment : Fragment() {
+
+    private val viewModel by viewModels<MainViewModel>()
 
     companion object {
         fun newInstance() = MainFragment()
     }
-
-    private lateinit var viewModel: MainViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -25,8 +29,20 @@ class MainFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        viewModel = ViewModelProvider(this).get(MainViewModel::class.java)
-        // TODO: Use the ViewModel
+
+        val directRequest = context?.filesDir
+
+        val injectedRequest = viewModel.getFilesPath()
+
+        val message = if(injectedRequest.absolutePath.equals(directRequest?.absolutePath)) {
+            "SUCCESS:"
+        } else {
+            "FAILED:"
+        }
+        view?.findViewById<TextView>(R.id.message)?.text = message
+        view?.findViewById<TextView>(R.id.message1)?.text = "deep=$injectedRequest"
+        view?.findViewById<TextView>(R.id.message2)?.text = "frag's=$directRequest"
+
     }
 
 }
